@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Indicadores Educacionais</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --surface-0: #F4F3EF;
+    --surface-1: #FFFFFF;
+    --surface-2: #FFFFFF;
+    --border: #E4E2DB;
+    --border-strong: #CFCCC2;
+    --text-primary: #1F1E1B;
+    --text-secondary: #6B6A64;
+    --text-muted: #9A9890;
+    --accent: #185FA5;
+    --accent-bg: #E6F1FB;
+    --teal: #0F9E7A;
+    --teal-light: #E1F5EE;
+    --radius: 8px;
+
+    --c-gray: #D3D1C7;
+    --c-teal: #5DCAA5;
+    --c-blue: #378ADD;
+    --c-purple: #7F77DD;
+    --c-coral: #D85A30;
+    --c-red: #E24B4A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--surface-0);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app { display: flex; height: 100vh; }
+
+  /* Sidebar nav */
+  .sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sidebar-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+  }
+  .nav-item i { font-size: 18px; }
+  .nav-item:hover { background: var(--surface-0); }
+  .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+
+  /* Main */
+  .main {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    min-width: 0;
+  }
+
+  .page { display: none; flex-direction: column; gap: 1rem; height: 100%; }
+  .page.active { display: flex; }
+
+  .page-title { font-size: 20px; font-weight: 600; }
+
+  .body-row {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Vertical filters panel */
+  .filters-panel {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: fit-content;
+  }
+
+  .filters-panel .filters-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: -4px;
+  }
+
+  .filter-field label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .filter-field select {
+    width: 100%;
+    height: 34px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .filter-field.toggle-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .filter-field.toggle-field label { margin-bottom: 0; font-size: 12px; color: var(--text-primary); }
+
+  .switch { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border-strong); border-radius: 999px; transition: 0.15s;
+  }
+  .switch .slider:before {
+    position: absolute; content: ""; height: 15px; width: 15px; left: 2px; top: 2px;
+    background: #fff; border-radius: 50%; transition: 0.15s;
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider:before { transform: translateX(15px); }
+
+  .content-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 12px;
+  }
+  .cards.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .card-label { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .card-value { font-size: 24px; font-weight: 600; }
+
+  /* Charts row */
+  .charts {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+    flex: 1;
+    min-height: 360px;
+  }
+  .charts.single-col { grid-template-columns: 1fr; }
+
+  .panel {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .panel-title {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  /* Decomposition tree */
+  .decomp-tree { position: relative; flex: 1; min-height: 260px; }
+  .decomp-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .decomp-columns {
+    position: relative; z-index: 1; display: flex;
+    justify-content: space-between; align-items: center; height: 100%; gap: 8px;
+  }
+  .col { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .col-level1 { justify-content: space-around; height: 100%; gap: 10px; }
+  .col-level2 { justify-content: space-around; height: 100%; gap: 6px; }
+  .level2-group { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+
+  .tnode { background: var(--surface-0); border-radius: 6px; padding: 7px 10px; min-width: 128px; }
+  .tnode.root { min-width: 110px; background: var(--teal-light); }
+  .tnode .t-label { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .tnode.root .t-label { color: #0B6E56; }
+  .tnode .t-value { font-size: 11.5px; color: var(--text-secondary); margin: 1px 0 5px; white-space: nowrap; }
+  .tnode.leaf .t-label { font-weight: 400; font-size: 12px; }
+  .t-bar-track { width: 100%; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .t-bar-fill { height: 100%; background: var(--teal); border-radius: 3px; }
+
+  /* Horizontal stacked bar */
+  .hstack-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+  .hstack-bar { display: flex; width: 100%; height: 46px; border-radius: 8px; overflow: hidden; }
+  .hseg { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Vertical bar chart */
+  .vbar-wrap { flex: 1; display: flex; align-items: flex-end; gap: 14px; padding-top: 10px; }
+  .vbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+  .vbar-value { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .vbar-fill { width: 60%; border-radius: 4px 4px 0 0; background: var(--accent); }
+  .vbar-label { font-size: 11px; color: var(--text-secondary); text-align: center; margin-top: 4px; }
+
+  /* Horizontal ranking bars */
+  .rank-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+  .rank-row { display: flex; align-items: center; gap: 10px; }
+  .rank-label { width: 130px; flex-shrink: 0; font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rank-track { flex: 1; height: 14px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .rank-fill { height: 100%; background: var(--c-coral); border-radius: 4px; }
+  .rank-value { width: 52px; flex-shrink: 0; text-align: right; font-size: 12.5px; font-weight: 600; }
+
+  @media (max-width: 1000px) {
+    .cards, .cards.cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .charts { grid-template-columns: 1fr; }
+    .body-row { flex-direction: column; }
+    .filters-panel { width: 100%; flex-direction: row; flex-wrap: wrap; }
+    .filter-field { width: 150px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-title">Painel de indicadores</div>
+    <div class="nav-item active" data-target="page-visao-geral"><i class="ti ti-layout-dashboard"></i>Visão geral</div>
+    <div class="nav-item" data-target="page-fluxo-escolar"><i class="ti ti-arrows-shuffle"></i>Fluxo escolar</div>
+    <div class="nav-item" data-target="page-notas"><i class="ti ti-chart-line"></i>Notas</div>
+    <div class="nav-item" data-target="page-frequencia"><i class="ti ti-calendar-stats"></i>Frequência</div>
+  </div>
+
+  <div class="main">
+
+    <!-- PAGE 1: VISAO GERAL -->
+    <div class="page active" id="page-visao-geral">
+      <div class="page-title">Visão geral</div>
+      <div class="body-row">
+        <div class="filters-panel">
+          <div class="filters-title">Filtros</div>
+          <div class="filter-field"><label>Modalidade</label><select><option>Todas</option><option>Regular</option><option>EJA</option><option>Profissional</option></select></div>
+          <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
+          <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+          <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
+          <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
+          <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
+        </div>
+
+        <div class="content-col">
+          <div class="cards">
+            <div class="card"><div class="card-label">N° matrículas</div><div class="card-value">812,4 mil</div></div>
+            <div class="card"><div class="card-label">N° turmas</div><div class="card-value">31,6 mil</div></div>
+            <div class="card"><div class="card-label">N° escolas</div><div class="card-value">1.240</div></div>
+            <div class="card"><div class="card-label">Professores em regência</div><div class="card-value">42,1 mil</div></div>
+            <div class="card"><div class="card-label">Frequência média</div><div class="card-value">91,3%</div></div>
+            <div class="card"><div class="card-label">Nota média</div><div class="card-value">6,4</div></div>
+          </div>
+
+          <div class="charts">
+            <div class="panel">
+              <div class="panel-title">Matrículas por modalidade e nível/segmento</div>
+              <div class="decomp-tree" id="decompTree">
+                <svg class="decomp-svg" id="decompSvg"></svg>
+                <div class="decomp-columns">
+                  <div class="col col-root">
+                    <div class="tnode root" id="n-root">
+                      <div class="t-label">Matrículas</div>
+                      <div class="t-value">812,4 mil</div>
+                    </div>
+                  </div>
+                  <div class="col col-level1">
+                    <div class="tnode" id="n-regular" data-parent="n-root">
+                      <div class="t-label">Regular</div>
+                      <div class="t-value">680k</div>
+                      <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                    </div>
+                    <div class="tnode" id="n-eja" data-parent="n-root">
+                      <div class="t-label">EJA</div>
+                      <div class="t-value">92k</div>
+                      <div class="t-bar-track"><div class="t-bar-fill" style="width:13.5%"></div></div>
+                    </div>
+                    <div class="tnode" id="n-prof" data-parent="n-root">
+                      <div class="t-label">Profissional</div>
+                      <div class="t-value">40k</div>
+                      <div class="t-bar-track"><div class="t-bar-fill" style="width:5.9%"></div></div>
+                    </div>
+                  </div>
+                  <div class="col col-level2">
+                    <div class="level2-group">
+                      <div class="tnode leaf" id="n-ed-inf" data-parent="n-regular">
+                        <div class="t-label">Educação infantil</div>
+                        <div class="t-value">190k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:56%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-ens-fund" data-parent="n-regular">
+                        <div class="t-label">Ensino fundamental</div>
+                        <div class="t-value">340k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-ens-med" data-parent="n-regular">
+                        <div class="t-label">Ensino médio</div>
+                        <div class="t-value">150k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:44%"></div></div>
+                      </div>
+                    </div>
+                    <div class="level2-group">
+                      <div class="tnode leaf" id="n-ens-fund-eja" data-parent="n-eja">
+                        <div class="t-label">Ensino fundamental</div>
+                        <div class="t-value">51k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-ens-med-eja" data-parent="n-eja">
+                        <div class="t-label">Ensino médio</div>
+                        <div class="t-value">41k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:80%"></div></div>
+                      </div>
+                    </div>
+                    <div class="level2-group">
+                      <div class="tnode leaf" id="n-tecnico" data-parent="n-prof">
+                        <div class="t-label">Técnico integrado</div>
+                        <div class="t-value">40k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">% de turmas por faixa de estudantes</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:8%; background:var(--c-gray); color:#3A3936;">8%</div>
+                  <div class="hseg" style="width:22%; background:var(--c-teal);">22%</div>
+                  <div class="hseg" style="width:38%; background:var(--c-blue);">38%</div>
+                  <div class="hseg" style="width:24%; background:var(--c-purple);">24%</div>
+                  <div class="hseg" style="width:8%; background:var(--c-coral);">8%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-gray);"></span>0-10 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>11-20 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>21-30 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>31-40 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>40+ alunos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: FLUXO ESCOLAR -->
+    <div class="page" id="page-fluxo-escolar">
+      <div class="page-title">Fluxo escolar</div>
+      <div class="body-row">
+        <div class="filters-panel">
+          <div class="filters-title">Filtros</div>
+          <div class="filter-field"><label>Modalidade</label><select><option>Todas</option><option>Regular</option><option>EJA</option><option>Profissional</option></select></div>
+          <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
+          <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+          <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
+          <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
+          <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
+          <div class="filter-field toggle-field">
+            <label>Estudantes acima de 18 anos</label>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="content-col">
+          <div class="cards cols-4">
+            <div class="card"><div class="card-label">Taxa de aprovação</div><div class="card-value">86%</div></div>
+            <div class="card"><div class="card-label">Taxa de reprovação</div><div class="card-value">10%</div></div>
+            <div class="card"><div class="card-label">Taxa de abandono</div><div class="card-value">4%</div></div>
+            <div class="card"><div class="card-label">Taxa de distorção idade-série</div><div class="card-value">12,6%</div></div>
+          </div>
+
+          <div class="charts single-col">
+            <div class="panel">
+              <div class="panel-title">% de estudantes por rendimento</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:78%; background:var(--c-teal);">78%</div>
+                  <div class="hseg" style="width:8%; background:var(--c-blue);">8%</div>
+                  <div class="hseg" style="width:6%; background:var(--c-coral);">6%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-purple);">4%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-red);">4%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>Aprovado</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>Aprovado com RPP</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>Reprovado por nota</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>Reprovado por falta</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-red);"></span>Abandono</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">% de aprovação por regional</div>
+              <div class="rank-wrap">
+                <div class="rank-row"><div class="rank-label">Regional 1</div><div class="rank-track"><div class="rank-fill" style="width:90%; background:var(--c-teal);"></div></div><div class="rank-value">90%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 2</div><div class="rank-track"><div class="rank-fill" style="width:87%; background:var(--c-teal);"></div></div><div class="rank-value">87%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 3</div><div class="rank-track"><div class="rank-fill" style="width:92%; background:var(--c-teal);"></div></div><div class="rank-value">92%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 4</div><div class="rank-track"><div class="rank-fill" style="width:84%; background:var(--c-teal);"></div></div><div class="rank-value">84%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 5</div><div class="rank-track"><div class="rank-fill" style="width:88%; background:var(--c-teal);"></div></div><div class="rank-value">88%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 6</div><div class="rank-track"><div class="rank-fill" style="width:82%; background:var(--c-teal);"></div></div><div class="rank-value">82%</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 3: NOTAS (placeholder - aguardando definição de indicadores) -->
+    <div class="page" id="page-notas">
+      <div class="page-title">Notas</div>
+      <div class="body-row">
+        <div class="filters-panel">
+          <div class="filters-title">Filtros</div>
+          <div class="filter-field"><label>Modalidade</label><select><option>Todas</option><option>Regular</option><option>EJA</option><option>Profissional</option></select></div>
+          <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
+          <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+          <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
+          <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
+          <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
+          <div class="filter-field toggle-field">
+            <label>Estudantes acima de 18 anos</label>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="content-col">
+          <div class="cards">
+            <div class="card"><div class="card-label">Nota média geral</div><div class="card-value">6,4</div></div>
+            <div class="card"><div class="card-label">N° de estudantes reprovados</div><div class="card-value">38,2 mil</div></div>
+            <div class="card"><div class="card-label">N° de estudantes com ao menos um componente reprovado</div><div class="card-value">96,5 mil</div></div>
+          </div>
+
+          <div class="charts single-col">
+            <div class="panel">
+              <div class="panel-title">Distribuição de estudantes por n° de componentes reprovados</div>
+              <div class="vbar-wrap">
+                <div class="vbar-col"><div class="vbar-value">38%</div><div class="vbar-fill" style="height:38%"></div><div class="vbar-label">1</div></div>
+                <div class="vbar-col"><div class="vbar-value">22%</div><div class="vbar-fill" style="height:22%"></div><div class="vbar-label">2</div></div>
+                <div class="vbar-col"><div class="vbar-value">14%</div><div class="vbar-fill" style="height:14%"></div><div class="vbar-label">3</div></div>
+                <div class="vbar-col"><div class="vbar-value">9%</div><div class="vbar-fill" style="height:9%"></div><div class="vbar-label">4</div></div>
+                <div class="vbar-col"><div class="vbar-value">6%</div><div class="vbar-fill" style="height:6%"></div><div class="vbar-label">5</div></div>
+                <div class="vbar-col"><div class="vbar-value">4%</div><div class="vbar-fill" style="height:4%"></div><div class="vbar-label">6</div></div>
+                <div class="vbar-col"><div class="vbar-value">4%</div><div class="vbar-fill" style="height:4%"></div><div class="vbar-label">7</div></div>
+                <div class="vbar-col"><div class="vbar-value">3%</div><div class="vbar-fill" style="height:3%"></div><div class="vbar-label">8</div></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Componentes com maior n° de estudantes em reprovação</div>
+              <div class="rank-wrap">
+                <div class="rank-row"><div class="rank-label">Matemática</div><div class="rank-track"><div class="rank-fill" style="width:100%"></div></div><div class="rank-value">18,4 mil</div></div>
+                <div class="rank-row"><div class="rank-label">Português</div><div class="rank-track"><div class="rank-fill" style="width:77%"></div></div><div class="rank-value">14,2 mil</div></div>
+                <div class="rank-row"><div class="rank-label">Química</div><div class="rank-track"><div class="rank-fill" style="width:53%"></div></div><div class="rank-value">9,8 mil</div></div>
+                <div class="rank-row"><div class="rank-label">Física</div><div class="rank-track"><div class="rank-fill" style="width:47%"></div></div><div class="rank-value">8,6 mil</div></div>
+                <div class="rank-row"><div class="rank-label">História</div><div class="rank-track"><div class="rank-fill" style="width:33%"></div></div><div class="rank-value">6,1 mil</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 4: FREQUENCIA -->
+    <div class="page" id="page-frequencia">
+      <div class="page-title">Frequência</div>
+      <div class="body-row">
+        <div class="filters-panel">
+          <div class="filters-title">Filtros</div>
+          <div class="filter-field"><label>Modalidade</label><select><option>Todas</option><option>Regular</option><option>EJA</option><option>Profissional</option></select></div>
+          <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
+          <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+          <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
+          <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
+          <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
+          <div class="filter-field toggle-field">
+            <label>Estudantes acima de 18 anos</label>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="content-col">
+          <div class="cards">
+            <div class="card"><div class="card-label">Frequência média geral</div><div class="card-value">91,3%</div></div>
+            <div class="card"><div class="card-label">% de estudantes com frequência abaixo de 75%</div><div class="card-value">8,6%</div></div>
+            <div class="card"><div class="card-label">Estudantes com frequência inferior a 50%</div><div class="card-value">1,8%</div></div>
+          </div>
+
+          <div class="charts single-col">
+            <div class="panel">
+              <div class="panel-title">Frequência média por regional/município</div>
+              <div class="rank-wrap">
+                <div class="rank-row"><div class="rank-label">Regional 1</div><div class="rank-track"><div class="rank-fill" style="width:92%; background:var(--accent);"></div></div><div class="rank-value">92%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 2</div><div class="rank-track"><div class="rank-fill" style="width:89%; background:var(--accent);"></div></div><div class="rank-value">89%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 3</div><div class="rank-track"><div class="rank-fill" style="width:94%; background:var(--accent);"></div></div><div class="rank-value">94%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 4</div><div class="rank-track"><div class="rank-fill" style="width:87%; background:var(--accent);"></div></div><div class="rank-value">87%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 5</div><div class="rank-track"><div class="rank-fill" style="width:90%; background:var(--accent);"></div></div><div class="rank-value">90%</div></div>
+                <div class="rank-row"><div class="rank-label">Regional 6</div><div class="rank-track"><div class="rank-fill" style="width:85%; background:var(--accent);"></div></div><div class="rank-value">85%</div></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Distribuição de estudantes por faixa de frequência</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:1%; background:var(--c-red);"></div>
+                  <div class="hseg" style="width:2%; background:var(--c-coral);"></div>
+                  <div class="hseg" style="width:6%; background:var(--c-blue);">6%</div>
+                  <div class="hseg" style="width:91%; background:var(--c-teal);">91%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-red);"></span>0-25% · 1%</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>25-50% · 2%</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>50-75% · 6%</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>75-100% · 91%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function drawDecompTree() {
+  var container = document.getElementById('decompTree');
+  if (!container || container.offsetParent === null) return;
+  var svg = document.getElementById('decompSvg');
+  var containerRect = container.getBoundingClientRect();
+  svg.setAttribute('viewBox', '0 0 ' + containerRect.width + ' ' + containerRect.height);
+  svg.innerHTML = '';
+
+  var nodes = container.querySelectorAll('[data-parent]');
+  nodes.forEach(function(node) {
+    var parentId = node.getAttribute('data-parent');
+    var parent = document.getElementById(parentId);
+    if (!parent) return;
+
+    var pRect = parent.getBoundingClientRect();
+    var cRect = node.getBoundingClientRect();
+
+    var x1 = pRect.right - containerRect.left;
+    var y1 = pRect.top + pRect.height / 2 - containerRect.top;
+    var x2 = cRect.left - containerRect.left;
+    var y2 = cRect.top + cRect.height / 2 - containerRect.top;
+
+    var midX = (x1 + x2) / 2;
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    var d = 'M ' + x1 + ' ' + y1 + ' C ' + midX + ' ' + y1 + ', ' + midX + ' ' + y2 + ', ' + x2 + ' ' + y2;
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#CFCCC2');
+    path.setAttribute('stroke-width', '1.5');
+    svg.appendChild(path);
+  });
+}
+
+function showPage(targetId) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById(targetId).classList.add('active');
+  document.querySelector('.nav-item[data-target="' + targetId + '"]').classList.add('active');
+  if (targetId === 'page-visao-geral') {
+    setTimeout(drawDecompTree, 0);
+  }
+}
+
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    showPage(item.getAttribute('data-target'));
+  });
+});
+
+window.addEventListener('load', drawDecompTree);
+window.addEventListener('resize', drawDecompTree);
+</script>
+
+</body>
+</html>
