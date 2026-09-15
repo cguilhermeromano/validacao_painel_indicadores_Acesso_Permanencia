@@ -52,6 +52,24 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    position: relative;
+    transition: width 0.18s ease, padding 0.18s ease;
+  }
+
+  .sidebar.collapsed {
+    width: 56px;
+    padding: 1.25rem 0.5rem;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px 16px 4px;
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
   }
 
   .sidebar-title {
@@ -60,8 +78,28 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 4px 10px 16px;
+    line-height: 1.4;
+    flex: 1;
+    min-width: 0;
   }
+
+  .sidebar.collapsed .sidebar-title { display: none; }
+
+  .sidebar-toggle {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .sidebar-toggle:hover { background: var(--surface-0); color: var(--text-primary); }
 
   .nav-item {
     display: flex;
@@ -74,10 +112,15 @@
     cursor: pointer;
     text-decoration: none;
     user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
   }
-  .nav-item i { font-size: 18px; }
+  .nav-item i { font-size: 18px; flex-shrink: 0; }
   .nav-item:hover { background: var(--surface-0); }
   .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
+  .sidebar.collapsed .nav-label { display: none; }
 
   /* Main */
   .main {
@@ -175,11 +218,11 @@
 
   /* Cards */
   .cards {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
   }
-  .cards.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
 
   .card {
     background: var(--surface-1);
@@ -189,7 +232,10 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    flex: 0 1 calc((100% - 2 * 12px) / 3);
+    min-width: 0;
   }
+  .cards.cols-4 .card { flex-basis: calc((100% - 3 * 12px) / 4); }
   .card-icon { font-size: 19px; color: var(--accent); flex-shrink: 0; line-height: 1; margin-top: 2px; }
   .card-body { min-width: 0; }
   .card-label { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 4px; }
@@ -210,6 +256,7 @@
     flex: 0 0 auto;
     margin-top: 4px;
   }
+  .charts.single-panel { grid-template-columns: 1fr; }
 
   .panel {
     background: var(--surface-2);
@@ -239,6 +286,9 @@
   .col-level1 { justify-content: space-around; height: 100%; gap: 10px; }
   .col-level2 { justify-content: space-around; height: 100%; gap: 6px; }
   .level2-group { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .col-level3 { justify-content: space-around; height: 100%; gap: 4px; }
+  .level3-group { display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+  .col-level3 .tnode { min-width: 96px; padding: 5px 8px; }
 
   .tnode { background: var(--surface-0); border-radius: 6px; padding: 7px 10px; min-width: 128px; }
   .tnode.root { min-width: 110px; background: var(--teal-light); }
@@ -289,6 +339,16 @@
   .scatter-tick { font-size: 6px; fill: var(--text-muted); }
   .scatter-trend { stroke: var(--c-coral); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
 
+  /* Line chart */
+  .linechart-wrap { flex: 1; min-height: 260px; }
+  .linechart-svg { width: 100%; height: 100%; }
+  .linechart-axis { stroke: var(--border-strong); stroke-width: 1; }
+  .linechart-grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+  .linechart-tick { font-size: 10px; fill: var(--text-muted); }
+  .linechart-line { fill: none; stroke-width: 2.5; }
+  .linechart-dot { r: 3; }
+  .linechart-value { font-size: 10px; font-weight: 600; }
+
   /* Data table */
   .table-wrap { flex: 1; overflow: auto; }
   .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -298,8 +358,23 @@
   .diff-pos { color: var(--c-teal); font-weight: 600; }
   .diff-neg { color: var(--c-red); font-weight: 600; }
 
+  /* Priority tables section (Regional / Escola / Estudante) */
+  .section-heading { font-size: 15px; font-weight: 600; margin: 6px 0 -2px; }
+  .charts.single-col.tables-section { grid-auto-rows: auto; margin-bottom: 4px; }
+  .tables-section .table-wrap { flex: none; overflow-x: auto; }
+  .tables-section .data-table td, .tables-section .data-table th { white-space: nowrap; }
+
+  .semaforo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12px; }
+  .semaforo::before { content: ''; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .semaforo-red { color: var(--c-red); }
+  .semaforo-red::before { background: var(--c-red); }
+  .semaforo-yellow { color: #B4791A; }
+  .semaforo-yellow::before { background: #E3A32B; }
+  .semaforo-green { color: var(--teal); }
+  .semaforo-green::before { background: var(--teal); }
+
   @media (max-width: 1000px) {
-    .cards, .cards.cols-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .card, .cards.cols-4 .card { flex-basis: calc((100% - 12px) / 2); }
     .charts { grid-template-columns: 1fr; }
     .body-row { flex-direction: column; }
     .filters-panel { width: 100%; flex-direction: row; flex-wrap: wrap; }
@@ -312,13 +387,17 @@
 <body>
 
 <div class="app">
-  <div class="sidebar">
-    <div class="sidebar-title">Painel de indicadores</div>
-    <div class="nav-item active" data-target="page-visao-geral"><i class="ti ti-layout-dashboard"></i>Visão geral</div>
-    <div class="nav-item" data-target="page-fluxo-escolar"><i class="ti ti-arrows-shuffle"></i>Fluxo escolar</div>
-    <div class="nav-item" data-target="page-notas"><i class="ti ti-chart-line"></i>Notas</div>
-    <div class="nav-item" data-target="page-frequencia"><i class="ti ti-calendar-stats"></i>Frequência</div>
-    <div class="nav-item" data-target="page-lotacao-docente"><i class="ti ti-users"></i>Lotação docente</div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Painel de indicadores</div>
+      <div class="sidebar-toggle" id="sidebarToggle" title="Recolher menu"><i class="ti ti-chevron-left"></i></div>
+    </div>
+    <div class="nav-item active" data-target="page-visao-geral" title="Visão geral"><i class="ti ti-layout-dashboard"></i><span class="nav-label">Visão geral</span></div>
+    <div class="nav-item" data-target="page-fluxo-escolar" title="Fluxo escolar"><i class="ti ti-arrows-shuffle"></i><span class="nav-label">Fluxo escolar</span></div>
+    <div class="nav-item" data-target="page-notas" title="Notas"><i class="ti ti-chart-line"></i><span class="nav-label">Notas</span></div>
+    <div class="nav-item" data-target="page-frequencia" title="Frequência"><i class="ti ti-calendar-stats"></i><span class="nav-label">Frequência</span></div>
+    <div class="nav-item" data-target="page-lotacao-docente" title="Lotação docente"><i class="ti ti-users"></i><span class="nav-label">Lotação docente</span></div>
+    <div class="nav-item" data-target="page-enturmacao" title="Enturmação"><i class="ti ti-layout-grid"></i><span class="nav-label">Enturmação</span></div>
   </div>
 
   <div class="main">
@@ -333,7 +412,7 @@
           <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
           <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
           <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
-          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo e com matrícula ativa</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
           <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
           <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
           <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
@@ -344,17 +423,23 @@
             <div class="card"><i class="ti ti-user-check card-icon"></i><div class="card-body"><div class="card-label">N° matrículas</div><div class="card-value">812,4 mil</div></div></div>
             <div class="card"><i class="ti ti-chalkboard card-icon"></i><div class="card-body"><div class="card-label">N° turmas</div><div class="card-value">31,6 mil</div></div></div>
             <div class="card"><i class="ti ti-school card-icon"></i><div class="card-body"><div class="card-label">N° escolas</div><div class="card-value">1.240</div></div></div>
-            <div class="card"><i class="ti ti-presentation card-icon"></i><div class="card-body"><div class="card-label">Professores em regência</div><div class="card-value">42,1 mil</div></div></div>
-            <div class="card"><i class="ti ti-calendar-check card-icon"></i><div class="card-body"><div class="card-label">Frequência média</div><div class="card-value">91,3%</div></div></div>
-            <div class="card"><i class="ti ti-star card-icon"></i><div class="card-body"><div class="card-label">Nota média</div><div class="card-value">6,4</div></div></div>
-            <div class="card"><i class="ti ti-stack-2 card-icon"></i><div class="card-body"><div class="card-label">Turmas passíveis de agrupamento</div><div class="card-value">142</div></div></div>
-            <div class="card"><i class="ti ti-clock-bolt card-icon"></i><div class="card-body"><div class="card-label">Potencial de horas aula otimizadas (turmas agrupáveis)</div><div class="card-value">3.240 h/mês</div></div></div>
-            <div class="card"><i class="ti ti-gauge card-icon"></i><div class="card-body"><div class="card-label">Taxa de ocupação de turmas</div><div class="card-value">87%</div></div></div>
           </div>
 
-          <div class="charts">
+          <div class="cards cols-4">
+            <div class="card"><i class="ti ti-users card-icon"></i><div class="card-body"><div class="card-label">N° Total Matrículas de Professores</div><div class="card-value">48,3 mil</div></div></div>
+            <div class="card"><i class="ti ti-presentation card-icon"></i><div class="card-body"><div class="card-label">N° Matrículas de Professores em regência</div><div class="card-value">42,1 mil</div></div></div>
+            <div class="card"><i class="ti ti-clock card-icon"></i><div class="card-body"><div class="card-label">Carga Horária Necessária (semanal)</div><div class="card-value">790,2 mil h</div></div></div>
+            <div class="card"><i class="ti ti-clock-check card-icon"></i><div class="card-body"><div class="card-label">Carga Horária Atendida (semanal)</div><div class="card-value">736,3 mil h</div></div></div>
+          </div>
+
+          <div class="cards">
+            <div class="card"><i class="ti ti-calendar-check card-icon"></i><div class="card-body"><div class="card-label">Frequência média</div><div class="card-value">91,3%</div></div></div>
+            <div class="card"><i class="ti ti-star card-icon"></i><div class="card-body"><div class="card-label">Nota média</div><div class="card-value">6,4</div></div></div>
+          </div>
+
+          <div class="charts single-panel">
             <div class="panel">
-              <div class="panel-title">Matrículas por modalidade e nível/segmento</div>
+              <div class="panel-title">Matrículas por modalidade, nível/segmento e série</div>
               <div class="decomp-tree" id="decompTree">
                 <svg class="decomp-svg" id="decompSvg"></svg>
                 <div class="decomp-columns">
@@ -388,12 +473,12 @@
                         <div class="t-value">190k</div>
                         <div class="t-bar-track"><div class="t-bar-fill" style="width:56%"></div></div>
                       </div>
-                      <div class="tnode leaf" id="n-ens-fund" data-parent="n-regular">
+                      <div class="tnode" id="n-ens-fund" data-parent="n-regular">
                         <div class="t-label">Ensino fundamental</div>
                         <div class="t-value">340k</div>
                         <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
                       </div>
-                      <div class="tnode leaf" id="n-ens-med" data-parent="n-regular">
+                      <div class="tnode" id="n-ens-med" data-parent="n-regular">
                         <div class="t-label">Ensino médio</div>
                         <div class="t-value">150k</div>
                         <div class="t-bar-track"><div class="t-bar-fill" style="width:44%"></div></div>
@@ -413,32 +498,53 @@
                     </div>
                     <div class="level2-group">
                       <div class="tnode leaf" id="n-tecnico" data-parent="n-prof">
-                        <div class="t-label">Técnico integrado</div>
+                        <div class="t-label">Técnico</div>
                         <div class="t-value">40k</div>
                         <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-title">% de turmas por faixa de estudantes</div>
-              <div class="hstack-wrap">
-                <div class="hstack-bar">
-                  <div class="hseg" style="width:8%; background:var(--c-gray); color:#3A3936;">8%</div>
-                  <div class="hseg" style="width:22%; background:var(--c-teal);">22%</div>
-                  <div class="hseg" style="width:38%; background:var(--c-blue);">38%</div>
-                  <div class="hseg" style="width:24%; background:var(--c-purple);">24%</div>
-                  <div class="hseg" style="width:8%; background:var(--c-coral);">8%</div>
-                </div>
-                <div class="legend">
-                  <div class="legend-item"><span class="swatch" style="background:var(--c-gray);"></span>0-10 alunos</div>
-                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>11-20 alunos</div>
-                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>21-30 alunos</div>
-                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>31-40 alunos</div>
-                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>40+ alunos</div>
+                  <div class="col col-level3">
+                    <div class="level3-group">
+                      <div class="tnode leaf" id="n-6ano" data-parent="n-ens-fund">
+                        <div class="t-label">6º ano</div>
+                        <div class="t-value">95k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-7ano" data-parent="n-ens-fund">
+                        <div class="t-label">7º ano</div>
+                        <div class="t-value">88k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:93%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-8ano" data-parent="n-ens-fund">
+                        <div class="t-label">8º ano</div>
+                        <div class="t-value">82k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:86%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-9ano" data-parent="n-ens-fund">
+                        <div class="t-label">9º ano</div>
+                        <div class="t-value">75k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:79%"></div></div>
+                      </div>
+                    </div>
+                    <div class="level3-group">
+                      <div class="tnode leaf" id="n-1sr" data-parent="n-ens-med">
+                        <div class="t-label">1ª série</div>
+                        <div class="t-value">58k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:100%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-2sr" data-parent="n-ens-med">
+                        <div class="t-label">2ª série</div>
+                        <div class="t-value">50k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:86%"></div></div>
+                      </div>
+                      <div class="tnode leaf" id="n-3sr" data-parent="n-ens-med">
+                        <div class="t-label">3ª série</div>
+                        <div class="t-value">42k</div>
+                        <div class="t-bar-track"><div class="t-bar-fill" style="width:72%"></div></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -545,6 +651,63 @@
               </div>
             </div>
           </div>
+
+          <div class="section-heading">Tabelas de priorização</div>
+          <div class="charts single-col tables-section">
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Regional</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Regional</th><th>N° de matrículas</th><th>Taxa de aprovação</th><th>Taxa de reprovação por nota</th><th>Taxa de reprovação por falta</th><th>Taxa de abandono</th><th>Taxa de distorção idade-série</th><th>N° de desconsiderados</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Regional 6</td><td>98.400</td><td>82%</td><td>7%</td><td>6%</td><td>5%</td><td>15,8%</td><td>412</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 4</td><td>112.300</td><td>84%</td><td>6%</td><td>5%</td><td>5%</td><td>14,2%</td><td>380</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 2</td><td>134.700</td><td>87%</td><td>5%</td><td>4%</td><td>4%</td><td>12,1%</td><td>356</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 5</td><td>121.900</td><td>88%</td><td>5%</td><td>3%</td><td>4%</td><td>11,4%</td><td>298</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 3</td><td>145.200</td><td>92%</td><td>3%</td><td>2%</td><td>3%</td><td>9,6%</td><td>210</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Escola</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Escola</th><th>Regional</th><th>Município</th><th>N° de matrículas</th><th>Taxa de aprovação</th><th>Taxa de reprovação por nota</th><th>Taxa de reprovação por falta</th><th>Taxa de abandono</th><th>Taxa de distorção idade-série</th><th>N° de desconsiderados</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CE Rui Barbosa</td><td>Regional 6</td><td>São Gonçalo</td><td>1.240</td><td>78%</td><td>9%</td><td>7%</td><td>6%</td><td>18,4%</td><td>34</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Castro Alves</td><td>Regional 4</td><td>Nova Iguaçu</td><td>1.480</td><td>80%</td><td>8%</td><td>6%</td><td>6%</td><td>17,1%</td><td>29</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Tiradentes</td><td>Regional 2</td><td>Duque de Caxias</td><td>1.052</td><td>85%</td><td>6%</td><td>4%</td><td>5%</td><td>13,2%</td><td>21</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Santos Dumont</td><td>Regional 5</td><td>Niterói</td><td>980</td><td>89%</td><td>4%</td><td>3%</td><td>4%</td><td>10,8%</td><td>15</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Machado de Assis</td><td>Regional 3</td><td>Rio de Janeiro</td><td>1.610</td><td>93%</td><td>3%</td><td>2%</td><td>2%</td><td>8,1%</td><td>9</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Estudante</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Nome do estudante</th><th>Matrícula</th><th>Escola</th><th>Regional</th><th>Modalidade</th><th>Nível/segmento</th><th>Série</th><th>Turno</th><th>Aproveitamento</th><th>Em distorção idade-série</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Ana Beatriz Souza</td><td>2024118732</td><td>CE Rui Barbosa</td><td>Regional 6</td><td>Regular</td><td>Ensino médio</td><td>2ª série</td><td>Noturno</td><td>Reprovado por falta</td><td>Sim</td></tr>
+                    <tr><td>Carlos Eduardo Lima</td><td>2023094521</td><td>CE Castro Alves</td><td>Regional 4</td><td>Regular</td><td>Ensino fundamental</td><td>8º ano</td><td>Vespertino</td><td>Reprovado por nota</td><td>Sim</td></tr>
+                    <tr><td>Juliana Ferreira Alves</td><td>2024077310</td><td>CE Tiradentes</td><td>Regional 2</td><td>EJA</td><td>Ensino médio</td><td>3ª série</td><td>Noturno</td><td>Abandono</td><td>Não</td></tr>
+                    <tr><td>Pedro Henrique Costa</td><td>2022156489</td><td>CE Santos Dumont</td><td>Regional 5</td><td>Regular</td><td>Ensino fundamental</td><td>9º ano</td><td>Matutino</td><td>Reprovado por nota</td><td>Sim</td></tr>
+                    <tr><td>Marcos Vinícius Pereira</td><td>2024203187</td><td>CE Machado de Assis</td><td>Regional 3</td><td>Regular</td><td>Ensino médio</td><td>1ª série</td><td>Matutino</td><td>Aprovado com RPP</td><td>Não</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -573,7 +736,11 @@
             <div class="card"><i class="ti ti-star card-icon"></i><div class="card-body"><div class="card-label">Nota média geral</div><div class="card-value">6,4</div></div></div>
             <div class="card"><i class="ti ti-mood-sad card-icon"></i><div class="card-body"><div class="card-label">N° de estudantes reprovados</div><div class="card-value">38,2 mil</div></div></div>
             <div class="card"><i class="ti ti-alert-triangle card-icon"></i><div class="card-body"><div class="card-label">N° de estudantes com ao menos um componente reprovado</div><div class="card-value">96,5 mil</div></div></div>
+          </div>
+
+          <div class="cards">
             <div class="card"><i class="ti ti-clipboard-x card-icon"></i><div class="card-body"><div class="card-label">N° de escolas com pendências de notas</div><div class="card-value">47</div></div></div>
+            <div class="card"><i class="ti ti-user-exclamation card-icon"></i><div class="card-body"><div class="card-label">N° de estudantes com pendências de notas</div><div class="card-value">3,8 mil</div></div></div>
           </div>
 
           <div class="cards">
@@ -583,6 +750,26 @@
           </div>
 
           <div class="charts single-col">
+            <div class="panel">
+              <div class="panel-title">% de estudantes por rendimento</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:78%; background:var(--c-teal);">78%</div>
+                  <div class="hseg" style="width:8%; background:var(--c-blue);">8%</div>
+                  <div class="hseg" style="width:6%; background:var(--c-coral);">6%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-purple);">4%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-red);">4%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>Aprovado</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>Aprovado com RPP</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>Reprovado por nota</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>Reprovado por falta</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-red);"></span>Abandono</div>
+                </div>
+              </div>
+            </div>
+
             <div class="panel">
               <div class="panel-title">Distribuição de estudantes por n° de componentes reprovados</div>
               <div class="vbar-wrap">
@@ -1646,6 +1833,63 @@
               </div>
             </div>
           </div>
+
+          <div class="section-heading">Tabelas de priorização</div>
+          <div class="charts single-col tables-section">
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Regional</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Regional</th><th>N° de matrículas</th><th>Nota média</th><th>N° de estudantes reprovados</th><th>N° de estudantes com ao menos um componente reprovado</th><th>N° de escolas com pendências de notas</th><th>N° de estudantes com pendências de notas</th><th>% de lançamento de notas</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Regional 6</td><td>98.400</td><td>5,9</td><td>5.120</td><td>12.480</td><td>9</td><td>780</td><td>78%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 4</td><td>112.300</td><td>6,0</td><td>5.640</td><td>13.920</td><td>8</td><td>690</td><td>82%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 2</td><td>134.700</td><td>6,2</td><td>6.180</td><td>15.760</td><td>7</td><td>610</td><td>88%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 5</td><td>121.900</td><td>6,5</td><td>5.340</td><td>13.100</td><td>5</td><td>480</td><td>93%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 3</td><td>145.200</td><td>6,8</td><td>4.870</td><td>11.640</td><td>3</td><td>320</td><td>97%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Escola</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Escola</th><th>Regional</th><th>Município</th><th>N° de matrículas</th><th>Nota média</th><th>N° de estudantes reprovados</th><th>N° de estudantes com ao menos um componente reprovado</th><th>Pendência de notas</th><th>% de lançamento de notas · 1° / 2° / 3° trimestre</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CE Rui Barbosa</td><td>Regional 6</td><td>São Gonçalo</td><td>1.240</td><td>5,6</td><td>148</td><td>312</td><td>Sim</td><td>65% / 70% / 58%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Castro Alves</td><td>Regional 4</td><td>Nova Iguaçu</td><td>1.480</td><td>5,8</td><td>162</td><td>356</td><td>Sim</td><td>72% / 75% / 60%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Tiradentes</td><td>Regional 2</td><td>Duque de Caxias</td><td>1.052</td><td>6,1</td><td>98</td><td>240</td><td>Não</td><td>100% / 95% / 85%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Santos Dumont</td><td>Regional 5</td><td>Niterói</td><td>980</td><td>6,6</td><td>74</td><td>168</td><td>Não</td><td>100% / 100% / 92%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Machado de Assis</td><td>Regional 3</td><td>Rio de Janeiro</td><td>1.610</td><td>7,0</td><td>62</td><td>145</td><td>Não</td><td>100% / 100% / 100%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Estudante</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Nome do estudante</th><th>Matrícula</th><th>Escola</th><th>Regional</th><th>Modalidade</th><th>Nível/segmento</th><th>Série</th><th>Turno</th><th>Nota média do estudante</th><th>N° de componentes reprovados</th><th>Componentes reprovados</th><th>Pendência de lançamento de notas</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Ana Beatriz Souza</td><td>2024118732</td><td>CE Rui Barbosa</td><td>Regional 6</td><td>Regular</td><td>Ensino médio</td><td>2ª série</td><td>Noturno</td><td>4,2</td><td>3</td><td>Matemática, Física, Química</td><td>Sim</td></tr>
+                    <tr><td>Carlos Eduardo Lima</td><td>2023094521</td><td>CE Castro Alves</td><td>Regional 4</td><td>Regular</td><td>Ensino fundamental</td><td>8º ano</td><td>Vespertino</td><td>4,8</td><td>2</td><td>Matemática, Português</td><td>Não</td></tr>
+                    <tr><td>Juliana Ferreira Alves</td><td>2024077310</td><td>CE Tiradentes</td><td>Regional 2</td><td>EJA</td><td>Ensino médio</td><td>3ª série</td><td>Noturno</td><td>5,1</td><td>2</td><td>Química, História</td><td>Sim</td></tr>
+                    <tr><td>Pedro Henrique Costa</td><td>2022156489</td><td>CE Santos Dumont</td><td>Regional 5</td><td>Regular</td><td>Ensino fundamental</td><td>9º ano</td><td>Matutino</td><td>5,4</td><td>1</td><td>Matemática</td><td>Não</td></tr>
+                    <tr><td>Marcos Vinícius Pereira</td><td>2024203187</td><td>CE Machado de Assis</td><td>Regional 3</td><td>Regular</td><td>Ensino médio</td><td>1ª série</td><td>Matutino</td><td>5,9</td><td>1</td><td>Física</td><td>Não</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1689,11 +1933,32 @@
           </div>
 
           <div class="cards">
+            <div class="card"><i class="ti ti-list-search card-icon"></i><div class="card-body"><div class="card-label">Total de Estudantes na lista de busca ativa</div><div class="card-value">1.938</div></div></div>
             <div class="card"><i class="ti ti-user-search card-icon"></i><div class="card-body"><div class="card-label">% de sucesso na busca ativa</div><div class="card-value">64%</div></div></div>
             <div class="card"><i class="ti ti-user-check card-icon"></i><div class="card-body"><div class="card-label">N° de estudantes com sucesso na busca ativa</div><div class="card-value">1.240</div></div></div>
           </div>
 
           <div class="charts single-col">
+            <div class="panel">
+              <div class="panel-title">% de estudantes por rendimento</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:78%; background:var(--c-teal);">78%</div>
+                  <div class="hseg" style="width:8%; background:var(--c-blue);">8%</div>
+                  <div class="hseg" style="width:6%; background:var(--c-coral);">6%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-purple);">4%</div>
+                  <div class="hseg" style="width:4%; background:var(--c-red);">4%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>Aprovado</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>Aprovado com RPP</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>Reprovado por nota</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>Reprovado por falta</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-red);"></span>Abandono</div>
+                </div>
+              </div>
+            </div>
+
             <div class="panel">
               <div class="panel-title">Frequência média por regional/município</div>
               <div class="rank-wrap">
@@ -1724,6 +1989,63 @@
               </div>
             </div>
           </div>
+
+          <div class="section-heading">Tabelas de priorização</div>
+          <div class="charts single-col tables-section">
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Regional</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Regional</th><th>N° de matrículas</th><th>Frequência média</th><th>% de estudantes com frequência abaixo de 75%</th><th>N° de estudantes com frequência inferior a 50%</th><th>N° de estudantes com risco alto de infrequência</th><th>N° de estudantes na lista de busca ativa</th><th>% de sucesso na busca ativa</th><th>% de lançamento de frequência</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Regional 6</td><td>98.400</td><td>85%</td><td>14,2%</td><td>3.740</td><td>1.480</td><td>312</td><td>52%</td><td>80%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 4</td><td>112.300</td><td>87%</td><td>11,6%</td><td>3.257</td><td>1.290</td><td>268</td><td>58%</td><td>85%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 2</td><td>134.700</td><td>89%</td><td>9,8%</td><td>2.829</td><td>1.050</td><td>224</td><td>63%</td><td>90%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 5</td><td>121.900</td><td>90%</td><td>8,1%</td><td>1.950</td><td>890</td><td>186</td><td>68%</td><td>94%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 3</td><td>145.200</td><td>94%</td><td>5,4%</td><td>1.307</td><td>540</td><td>112</td><td>76%</td><td>98%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Escola</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Escola</th><th>Regional</th><th>Município</th><th>N° de matrículas</th><th>Frequência média</th><th>% de estudantes com frequência abaixo de 75%</th><th>N° de estudantes com frequência inferior a 50%</th><th>N° de estudantes com risco alto de infrequência</th><th>N° de estudantes na lista de busca ativa</th><th>% de sucesso na busca ativa</th><th>% de lançamento de frequência · 1° / 2° / 3° trimestre</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CE Rui Barbosa</td><td>Regional 6</td><td>São Gonçalo</td><td>1.240</td><td>82%</td><td>16,8%</td><td>57</td><td>58</td><td>22</td><td>45%</td><td>75% / 80% / 62%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Castro Alves</td><td>Regional 4</td><td>Nova Iguaçu</td><td>1.480</td><td>84%</td><td>14,1%</td><td>58</td><td>62</td><td>26</td><td>50%</td><td>80% / 85% / 68%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Tiradentes</td><td>Regional 2</td><td>Duque de Caxias</td><td>1.052</td><td>88%</td><td>10,2%</td><td>25</td><td>38</td><td>16</td><td>61%</td><td>95% / 92% / 80%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Santos Dumont</td><td>Regional 5</td><td>Niterói</td><td>980</td><td>91%</td><td>7,4%</td><td>15</td><td>24</td><td>10</td><td>70%</td><td>100% / 98% / 88%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Machado de Assis</td><td>Regional 3</td><td>Rio de Janeiro</td><td>1.610</td><td>95%</td><td>4,2%</td><td>10</td><td>12</td><td>5</td><td>80%</td><td>100% / 100% / 96%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Estudante</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Nome do estudante</th><th>Matrícula</th><th>Escola</th><th>Regional</th><th>Modalidade</th><th>Nível/segmento</th><th>Série</th><th>Turno</th><th>Frequência do estudante (%)</th><th>Risco de infrequência</th><th>Na lista de busca ativa</th><th>Sucesso na busca ativa</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Ana Beatriz Souza</td><td>2024118732</td><td>CE Rui Barbosa</td><td>Regional 6</td><td>Regular</td><td>Ensino médio</td><td>2ª série</td><td>Noturno</td><td>48%</td><td>Alto</td><td>Sim</td><td>Não</td></tr>
+                    <tr><td>Carlos Eduardo Lima</td><td>2023094521</td><td>CE Castro Alves</td><td>Regional 4</td><td>Regular</td><td>Ensino fundamental</td><td>8º ano</td><td>Vespertino</td><td>52%</td><td>Alto</td><td>Sim</td><td>Sim</td></tr>
+                    <tr><td>Juliana Ferreira Alves</td><td>2024077310</td><td>CE Tiradentes</td><td>Regional 2</td><td>EJA</td><td>Ensino médio</td><td>3ª série</td><td>Noturno</td><td>61%</td><td>Alto</td><td>Sim</td><td>Não</td></tr>
+                    <tr><td>Pedro Henrique Costa</td><td>2022156489</td><td>CE Santos Dumont</td><td>Regional 5</td><td>Regular</td><td>Ensino fundamental</td><td>9º ano</td><td>Matutino</td><td>68%</td><td>Médio</td><td>Sim</td><td>Sim</td></tr>
+                    <tr><td>Marcos Vinícius Pereira</td><td>2024203187</td><td>CE Machado de Assis</td><td>Regional 3</td><td>Regular</td><td>Ensino médio</td><td>1ª série</td><td>Matutino</td><td>73%</td><td>Médio</td><td>Não</td><td>N.A.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1748,6 +2070,13 @@
           <div class="cards">
             <div class="card"><i class="ti ti-briefcase-off card-icon"></i><div class="card-body"><div class="card-label">% de carência docente</div><div class="card-value">6,8%</div></div></div>
             <div class="card"><i class="ti ti-building-off card-icon"></i><div class="card-body"><div class="card-label">N° de Escolas com carência docente</div><div class="card-value">187</div></div></div>
+          </div>
+
+          <div class="cards cols-4">
+            <div class="card"><i class="ti ti-users card-icon"></i><div class="card-body"><div class="card-label">N° Total Matrículas de Professores</div><div class="card-value">48,3 mil</div></div></div>
+            <div class="card"><i class="ti ti-presentation card-icon"></i><div class="card-body"><div class="card-label">N° Matrículas de Professores em regência</div><div class="card-value">42,1 mil</div></div></div>
+            <div class="card"><i class="ti ti-clock card-icon"></i><div class="card-body"><div class="card-label">Carga Horária Necessária (semanal)</div><div class="card-value">790,2 mil h</div></div></div>
+            <div class="card"><i class="ti ti-clock-check card-icon"></i><div class="card-body"><div class="card-label">Carga Horária Atendida (semanal)</div><div class="card-value">736,3 mil h</div></div></div>
           </div>
 
           <div class="charts single-col">
@@ -1780,6 +2109,207 @@
                 <div class="rank-row"><div class="rank-label">Química</div><div class="rank-track"><div class="rank-fill" style="width:58%"></div></div><div class="rank-value">720 h</div></div>
                 <div class="rank-row"><div class="rank-label">Geografia</div><div class="rank-track"><div class="rank-fill" style="width:33%"></div></div><div class="rank-value">410 h</div></div>
                 <div class="rank-row"><div class="rank-label">História</div><div class="rank-track"><div class="rank-fill" style="width:31%"></div></div><div class="rank-value">380 h</div></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Distribuição em porcentagem de número de turmas e aulas sem alocação de professor por faixa de alunos</div>
+              <div class="legend">
+                <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>% Aulas sem alocação de professor por faixa de n° de alunos por turma</div>
+                <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>% de turmas por faixa de n° de alunos</div>
+                <div class="legend-item"><span class="swatch" style="background:var(--c-red);"></span>%Alunos x aulas (sem professor alocado)</div>
+              </div>
+              <div class="linechart-wrap">
+                <svg viewBox="0 0 700 320" class="linechart-svg">
+                  <line class="linechart-grid" x1="44" y1="215" x2="680" y2="215" />
+                  <line class="linechart-grid" x1="44" y1="148" x2="680" y2="148" />
+                  <line class="linechart-grid" x1="44" y1="81" x2="680" y2="81" />
+                  <line class="linechart-grid" x1="44" y1="14" x2="680" y2="14" />
+                  <line class="linechart-axis" x1="44" y1="14" x2="44" y2="282" />
+                  <line class="linechart-axis" x1="44" y1="282" x2="680" y2="282" />
+                  <text class="linechart-tick" x="36" y="285" text-anchor="end">0%</text>
+                  <text class="linechart-tick" x="36" y="218" text-anchor="end">10%</text>
+                  <text class="linechart-tick" x="36" y="151" text-anchor="end">20%</text>
+                  <text class="linechart-tick" x="36" y="84" text-anchor="end">30%</text>
+                  <text class="linechart-tick" x="36" y="17" text-anchor="end">40%</text>
+                  <text class="linechart-tick" x="44.0" y="298" text-anchor="middle">1-9</text>
+                  <text class="linechart-tick" x="171.2" y="298" text-anchor="middle">10-19</text>
+                  <text class="linechart-tick" x="298.4" y="298" text-anchor="middle">20-29</text>
+                  <text class="linechart-tick" x="425.6" y="298" text-anchor="middle">30-39</text>
+                  <text class="linechart-tick" x="552.8" y="298" text-anchor="middle">40-49</text>
+                  <text class="linechart-tick" x="680.0" y="298" text-anchor="middle">50+</text>
+
+                  <path d="M44.0 238.05 C86.4 238.05 128.8 166.16 171.2 166.16 C213.6 166.16 256.0 116.84 298.4 116.84 C340.8 116.84 383.2 65.86 425.6 65.86 C468.0 65.86 510.4 163.14 552.8 163.14 C595.2 163.14 637.6 255.74 680.0 255.74 L680.0 282 L44.0 282 Z" fill="var(--c-blue)" fill-opacity="0.16" stroke="none" />
+
+                  <path class="linechart-line" d="M44.0 238.05 C86.4 238.05 128.8 166.16 171.2 166.16 C213.6 166.16 256.0 116.84 298.4 116.84 C340.8 116.84 383.2 65.86 425.6 65.86 C468.0 65.86 510.4 163.14 552.8 163.14 C595.2 163.14 637.6 255.74 680.0 255.74" stroke="var(--c-blue)" />
+                  <path class="linechart-line" d="M44.0 208.50 C86.4 208.50 128.8 182.44 171.2 182.44 C213.6 182.44 256.0 125.02 298.4 125.02 C340.8 125.02 383.2 85.02 425.6 85.02 C468.0 85.02 510.4 179.22 552.8 179.22 C595.2 179.22 637.6 258.01 680.0 258.01" stroke="var(--c-purple)" />
+                  <path class="linechart-line" d="M44.0 273.63 C86.4 273.63 128.8 231.55 171.2 231.55 C213.6 231.55 256.0 144.98 298.4 144.98 C340.8 144.98 383.2 31.42 425.6 31.42 C468.0 31.42 510.4 111.28 552.8 111.28 C595.2 111.28 637.6 229.14 680.0 229.14" stroke="var(--c-red)" />
+
+                  <circle class="linechart-dot" cx="44.0" cy="238.05" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="44.0" y="229.05" text-anchor="middle" fill="var(--c-blue)">6,56%</text>
+                  <circle class="linechart-dot" cx="171.2" cy="166.16" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="171.2" y="157.16" text-anchor="middle" fill="var(--c-blue)">17,29%</text>
+                  <circle class="linechart-dot" cx="298.4" cy="116.84" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="298.4" y="100.84" text-anchor="middle" fill="var(--c-blue)">24,65%</text>
+                  <circle class="linechart-dot" cx="425.6" cy="65.86" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="425.6" y="56.86" text-anchor="middle" fill="var(--c-blue)">32,26%</text>
+                  <circle class="linechart-dot" cx="552.8" cy="163.14" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="552.8" y="154.14" text-anchor="middle" fill="var(--c-blue)">17,74%</text>
+                  <circle class="linechart-dot" cx="680.0" cy="255.74" fill="var(--c-blue)" />
+                  <text class="linechart-value" x="680.0" y="207.14" text-anchor="middle" fill="var(--c-blue)">3,92%</text>
+
+                  <circle class="linechart-dot" cx="44.0" cy="208.50" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="44.0" y="199.50" text-anchor="middle" fill="var(--c-purple)">10,97%</text>
+                  <circle class="linechart-dot" cx="171.2" cy="182.44" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="171.2" y="173.44" text-anchor="middle" fill="var(--c-purple)">14,86%</text>
+                  <circle class="linechart-dot" cx="298.4" cy="125.02" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="298.4" y="116.02" text-anchor="middle" fill="var(--c-purple)">23,43%</text>
+                  <circle class="linechart-dot" cx="425.6" cy="85.02" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="425.6" y="76.02" text-anchor="middle" fill="var(--c-purple)">29,40%</text>
+                  <circle class="linechart-dot" cx="552.8" cy="179.22" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="552.8" y="170.22" text-anchor="middle" fill="var(--c-purple)">15,34%</text>
+                  <circle class="linechart-dot" cx="680.0" cy="258.01" fill="var(--c-purple)" />
+                  <text class="linechart-value" x="680.0" y="194.14" text-anchor="middle" fill="var(--c-purple)">3,58%</text>
+
+                  <circle class="linechart-dot" cx="44.0" cy="273.63" fill="var(--c-red)" />
+                  <text class="linechart-value" x="44.0" y="264.63" text-anchor="middle" fill="var(--c-red)">1,25%</text>
+                  <circle class="linechart-dot" cx="171.2" cy="231.55" fill="var(--c-red)" />
+                  <text class="linechart-value" x="171.2" y="222.55" text-anchor="middle" fill="var(--c-red)">7,53%</text>
+                  <circle class="linechart-dot" cx="298.4" cy="144.98" fill="var(--c-red)" />
+                  <text class="linechart-value" x="298.4" y="135.98" text-anchor="middle" fill="var(--c-red)">20,45%</text>
+                  <circle class="linechart-dot" cx="425.6" cy="31.42" fill="var(--c-red)" />
+                  <text class="linechart-value" x="425.6" y="22.42" text-anchor="middle" fill="var(--c-red)">37,40%</text>
+                  <circle class="linechart-dot" cx="552.8" cy="111.28" fill="var(--c-red)" />
+                  <text class="linechart-value" x="552.8" y="102.28" text-anchor="middle" fill="var(--c-red)">25,48%</text>
+                  <circle class="linechart-dot" cx="680.0" cy="229.14" fill="var(--c-red)" />
+                  <text class="linechart-value" x="680.0" y="220.14" text-anchor="middle" fill="var(--c-red)">7,89%</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-heading">Tabelas de priorização</div>
+          <div class="charts single-col tables-section">
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Regional</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Regional</th><th>N° de escolas</th><th>% de carência docente</th><th>N° de escolas com carência docente</th><th>N° Total de Matrículas de Professores</th><th>N° de Matrículas de Professores em regência</th><th>Carga Horária Necessária (semanal)</th><th>Carga Horária Atendida (semanal)</th><th>% de turmas sem alocação de professor</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Regional 6</td><td>210</td><td>11,4%</td><td>42</td><td>6.820</td><td>5.640</td><td>118,4 mil h</td><td>98,6 mil h</td><td>9,2%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 4</td><td>245</td><td>9,8%</td><td>38</td><td>7.940</td><td>6.780</td><td>132,1 mil h</td><td>114,7 mil h</td><td>7,6%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 2</td><td>268</td><td>7,1%</td><td>31</td><td>8.610</td><td>7.560</td><td>142,8 mil h</td><td>130,9 mil h</td><td>5,4%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 5</td><td>232</td><td>5,6%</td><td>24</td><td>7.380</td><td>6.640</td><td>124,6 mil h</td><td>116,8 mil h</td><td>4,1%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 3</td><td>289</td><td>3,2%</td><td>14</td><td>9.240</td><td>8.560</td><td>152,3 mil h</td><td>147,1 mil h</td><td>2,3%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Escola</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Escola</th><th>Regional</th><th>Município</th><th>% de carência docente</th><th>N° Total de Matrículas de Professores</th><th>N° de Matrículas de Professores em regência</th><th>Carga Horária Necessária (semanal)</th><th>Carga Horária Atendida (semanal)</th><th>N° de turmas sem alocação de professor</th><th>N° de aulas sem alocação de professor</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CE Rui Barbosa</td><td>Regional 6</td><td>São Gonçalo</td><td>15,2%</td><td>86</td><td>68</td><td>1.480 h</td><td>1.180 h</td><td>6</td><td>24</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Castro Alves</td><td>Regional 4</td><td>Nova Iguaçu</td><td>12,8%</td><td>94</td><td>78</td><td>1.620 h</td><td>1.340 h</td><td>5</td><td>19</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Tiradentes</td><td>Regional 2</td><td>Duque de Caxias</td><td>8,4%</td><td>72</td><td>64</td><td>1.240 h</td><td>1.098 h</td><td>3</td><td>11</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Santos Dumont</td><td>Regional 5</td><td>Niterói</td><td>5,9%</td><td>65</td><td>59</td><td>1.080 h</td><td>986 h</td><td>2</td><td>6</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Machado de Assis</td><td>Regional 3</td><td>Rio de Janeiro</td><td>2,6%</td><td>108</td><td>102</td><td>1.860 h</td><td>1.792 h</td><td>1</td><td>3</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 6: ENTURMAÇÃO -->
+    <div class="page" id="page-enturmacao">
+      <div class="page-title">Enturmação</div>
+      <div class="body-row">
+        <div class="filters-panel">
+          <div class="filters-title">Filtros</div>
+          <div class="filter-field"><label>Modalidade</label><select><option>Todas</option><option>Regular</option><option>EJA</option><option>Profissional</option></select></div>
+          <div class="filter-field"><label>Nível/segmento</label><select><option>Todos</option><option>Educação infantil</option><option>Ensino fundamental</option><option>Ensino médio</option></select></div>
+          <div class="filter-field"><label>Série</label><select><option>Todas</option><option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option><option>1ª série</option><option>2ª série</option><option>3ª série</option></select></div>
+          <div class="filter-field"><label>Turno</label><select><option>Todos</option><option>Matutino</option><option>Vespertino</option><option>Noturno</option><option>Integral</option></select></div>
+          <div class="filter-field"><label>Status censo</label><select><option>Todos</option><option>Est. Migrado e c/ matrícula ativa</option><option>Est. Migrado em outra modalidade e transferido p/ Regular/Integrado</option><option>Est. não Migrado para Censo e com matrícula ativa</option><option>Est. Migrado em Regular/Integrado e transferido p/ outra modalidade</option><option>Est. migrado sem matrícula ativa</option></select></div>
+          <div class="filter-field"><label>Regional</label><select><option>Todas</option><option>BAIXADAS LITORÂNEAS</option><option>CENTRO SUL</option><option>METROPOLITANA I</option><option>METROPOLITANA II</option><option>METROPOLITANA III</option><option>METROPOLITANA IV</option><option>METROPOLITANA V</option><option>METROPOLITANA VI</option><option>METROPOLITANA VII</option><option>NOROESTE FLUMINENSE</option><option>NORTE FLUMINENSE</option><option>SERRANA I</option><option>SERRANA II</option><option>SUL FLUMINENSE</option></select></div>
+          <div class="filter-field"><label>Município</label><select><option>Todos</option><option>Rio de Janeiro</option><option>Niterói</option><option>Duque de Caxias</option><option>Nova Iguaçu</option><option>São Gonçalo</option></select></div>
+          <div class="filter-field"><label>Escola</label><select><option>Todas</option><option>CE Machado de Assis</option><option>CE Tiradentes</option><option>CE Santos Dumont</option><option>CE Rui Barbosa</option></select></div>
+        </div>
+
+        <div class="content-col">
+          <div class="cards">
+            <div class="card"><i class="ti ti-gauge card-icon"></i><div class="card-body"><div class="card-label">Taxa de ocupação de turmas</div><div class="card-value">87%</div></div></div>
+            <div class="card"><i class="ti ti-stack-2 card-icon"></i><div class="card-body"><div class="card-label">Turmas passíveis de agrupamento</div><div class="card-value">142</div></div></div>
+            <div class="card"><i class="ti ti-clock-bolt card-icon"></i><div class="card-body"><div class="card-label">Potencial de horas aula otimizadas (turmas agrupáveis)</div><div class="card-value">3.240 h/mês</div></div></div>
+          </div>
+
+          <div class="charts single-panel">
+            <div class="panel">
+              <div class="panel-title">% de turmas por faixa de estudantes</div>
+              <div class="hstack-wrap">
+                <div class="hstack-bar">
+                  <div class="hseg" style="width:8%; background:var(--c-gray); color:#3A3936;">8%</div>
+                  <div class="hseg" style="width:22%; background:var(--c-teal);">22%</div>
+                  <div class="hseg" style="width:38%; background:var(--c-blue);">38%</div>
+                  <div class="hseg" style="width:24%; background:var(--c-purple);">24%</div>
+                  <div class="hseg" style="width:8%; background:var(--c-coral);">8%</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-gray);"></span>0-10 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-teal);"></span>11-20 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-blue);"></span>21-30 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-purple);"></span>31-40 alunos</div>
+                  <div class="legend-item"><span class="swatch" style="background:var(--c-coral);"></span>40+ alunos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-heading">Tabelas de priorização</div>
+          <div class="charts single-col tables-section">
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Regional</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Regional</th><th>N° de turmas</th><th>Taxa de ocupação de turmas</th><th>N° de turmas passíveis de agrupamento</th><th>Potencial de horas aula otimizadas</th><th>% de turmas com baixa ocupação</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Regional 6</td><td>3.820</td><td>79%</td><td>38</td><td>890 h/mês</td><td>18,4%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 4</td><td>4.240</td><td>82%</td><td>31</td><td>760 h/mês</td><td>15,1%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>Regional 2</td><td>4.960</td><td>86%</td><td>26</td><td>620 h/mês</td><td>11,2%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 5</td><td>4.510</td><td>89%</td><td>22</td><td>540 h/mês</td><td>9,4%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>Regional 3</td><td>5.180</td><td>93%</td><td>12</td><td>310 h/mês</td><td>5,6%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title">Tabela Nível Escola</div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr><th>Escola</th><th>Regional</th><th>Município</th><th>N° de turmas</th><th>Taxa de ocupação de turmas</th><th>N° de turmas passíveis de agrupamento</th><th>Potencial de horas aula otimizadas</th><th>% de turmas com baixa ocupação</th><th>Criticidade</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>CE Rui Barbosa</td><td>Regional 6</td><td>São Gonçalo</td><td>48</td><td>74%</td><td>7</td><td>165 h/mês</td><td>22,9%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Castro Alves</td><td>Regional 4</td><td>Nova Iguaçu</td><td>56</td><td>78%</td><td>6</td><td>142 h/mês</td><td>19,6%</td><td><span class="semaforo semaforo-red">Crítico</span></td></tr>
+                    <tr><td>CE Tiradentes</td><td>Regional 2</td><td>Duque de Caxias</td><td>41</td><td>84%</td><td>4</td><td>96 h/mês</td><td>12,2%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Santos Dumont</td><td>Regional 5</td><td>Niterói</td><td>38</td><td>88%</td><td>3</td><td>68 h/mês</td><td>7,9%</td><td><span class="semaforo semaforo-yellow">Atenção</span></td></tr>
+                    <tr><td>CE Machado de Assis</td><td>Regional 3</td><td>Rio de Janeiro</td><td>62</td><td>94%</td><td>1</td><td>24 h/mês</td><td>3,2%</td><td><span class="semaforo semaforo-green">OK</span></td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1839,6 +2369,14 @@ document.querySelectorAll('.nav-item').forEach(function(item) {
   item.addEventListener('click', function() {
     showPage(item.getAttribute('data-target'));
   });
+});
+
+var sidebarEl = document.getElementById('sidebar');
+var sidebarToggleEl = document.getElementById('sidebarToggle');
+sidebarToggleEl.addEventListener('click', function() {
+  var collapsed = sidebarEl.classList.toggle('collapsed');
+  sidebarToggleEl.querySelector('i').className = collapsed ? 'ti ti-chevron-right' : 'ti ti-chevron-left';
+  sidebarToggleEl.setAttribute('title', collapsed ? 'Expandir menu' : 'Recolher menu');
 });
 
 window.addEventListener('load', drawDecompTree);
